@@ -1,0 +1,26 @@
+CREATE TABLE access_tokens (
+  access_token         VARCHAR(128)    NOT NULL,
+  client_id            VARCHAR(128)    NOT NULL,
+  expires              TIMESTAMP       NOT NULL,
+  PRIMARY KEY (access_token)
+);
+
+CREATE TABLE refresh_tokens (
+  refresh_token       VARCHAR(128)     NOT NULL,
+  client_id           VARCHAR(128)     NOT NULL,
+  expires             TIMESTAMP        NOT NULL,
+  user_agent          VARCHAR(2000)    NOT NULL,
+  hostname            VARCHAR(128)     NOT NULL,
+  access_token        VARCHAR(128)     NOT NULL,
+  PRIMARY KEY (refresh_token)
+);
+
+CREATE TABLE users (
+  username            VARCHAR(128)     NOT NULL,
+  password            VARCHAR(128)     NOT NULL,
+  client_id           VARCHAR(128)     NOT NULL,
+  first_name          VARCHAR(80),
+  last_name           VARCHAR(80),
+  verified      BOOLEAN,
+  PRIMARY KEY (username)
+);
