@@ -1,2 +1,2 @@
 <?php
-echo hash('sha256', $_GET['username']);
+echo hash('sha256', strtolower($_GET['username']);

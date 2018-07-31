@@ -9,6 +9,13 @@ if(isset($_SESSION['token'])) {
             if(time() < strtotime($row['expires'])) {
                 header('location: index.php');
             }
+            else {
+                $delete = sprintf("DELETE FROM refresh_tokens WHERE refresh_token='%s'", $_SESSION['token']);
+                $db->exec($delete);
+                unset($_SESSION['token']);
+                session_unset();
+                session_destroy();
+            }
         }
     }
 }
