@@ -1,10 +1,11 @@
 <?php
 require "db_connect.php";
 if(isset($_POST['submit'])) {
-
     $sql = sprintf("SELECT * FROM users WHERE client_id='%s'", $_POST['client']);
-    if($db->query($sql)->rowCount() > 0) {
-        $sql = sprintf("UPDATE users SET verified = TRUE WHERE client_id = '%s'", $_POST['client']);
+    $result = $db->prepare($sql);
+    $result->execute();
+    if($result->rowCount() > 0) {
+        $sql = sprintf("UPDATE users SET verified=TRUE WHERE client_id='%s'", $_POST['client']);
         $db->exec($sql);
     }
     header("location: ../login.php");

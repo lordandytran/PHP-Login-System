@@ -3,7 +3,9 @@ require "scripts/db_connect.php";
 $error = "";
 if(isset($_POST['submit'])) {
     $sql = sprintf("SELECT username FROM users WHERE username='%s'", strtolower($_POST['user']));
-    if($db->query($sql)->rowCount() > 0) {
+    $result = $db->prepare($sql);
+    $result->execute();
+    if($result->rowCount() > 0) {
         $error = "Username already taken";
     }
     else {
@@ -17,7 +19,7 @@ if(isset($_POST['submit'])) {
         unset($client_id);
         unset($client_secret);
         unset($sql);
-        header("location: login.php");
+        header("location: scripts/userid.php?username=" . $_POST['user']);
     }
 }
 ?>

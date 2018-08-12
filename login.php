@@ -3,14 +3,16 @@ require "scripts/db_connect.php";
 session_start();
 if(isset($_SESSION['token'])) {
     $sql = sprintf("SELECT expires FROM access_tokens WHERE access_token='%s'", $_SESSION['token']);
-    $query = $db->query($sql);
-    if($query->rowCount() > 0) {
+    $result = $db->prepare($sql);
+    $result->execute();
+    if($result->rowCount() > 0) {
+        $query = $db->query($sql);
         foreach($query as $row) {
             if(time() < strtotime($row['expires'])) {
                 header('location: index.php');
             }
             else {
-                $delete = sprintf("DELETE FROM refresh_tokens WHERE refresh_token='%s'", $_SESSION['token']);
+                $delete = sprintf("DELETE FROM refresh_tokens WHERE access_token='%s'", $_SESSION['token']);
                 $db->exec($delete);
                 unset($_SESSION['token']);
                 session_unset();
@@ -26,28 +28,44 @@ if(isset($_SESSION['token'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link type="text/css" rel="stylesheet" href="css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        if(localStorage.length > 0) {
+            for(var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if(key.match(/rtfront[-]refresh/)) {
+                    var refresh = localStorage.getItem(key);
+                    $.get("scripts/refresh.php", {token : refresh}, function(data) {
+                        data = JSON.parse(data);
+                        if(data.success === true) {
+                            const now = new Date();
+                            localStorage.setItem('rtfront-refresh' + now.getTime().toString(), data.token);
+                            window.location.href = "index.php";
+                        }
+                    });
+                }
+            }
+            $( document ).ready(function() {
+                $("body").show();
+            });
+        }
+        else {
+            $( document ).ready(function() {
+                $("body").show();
+            });
+        }
+    </script>
 </head>
 <body>
 <script>
-$(document).ready(function(){
-    var refresh = localStorage.getItem('site-refresh');
-    if(refresh) {
-        $.get("scripts/refresh.php", {token : refresh}, function(data) {
-            data = JSON.parse(data);
-            if(data.success === true) {
-                localStorage.setItem('rtfront-refresh', data.token);
-                window.location.href = "index.php";
-            }
-        });
-    }
-});
 function formSubmit() {
     $(".login-form").submit(function(event) {
         event.preventDefault();
         $.post("scripts/authorize.php", $(".login-form").serialize(), function(data) {
             data = JSON.parse(data);
+            $('.login-form').off('submit').submit();
             if(data.success === true) {
-                localStorage.setItem('site-refresh', data.token);
+                const now = new Date();
+                localStorage.setItem('rtfront-refresh' + now.getTime().toString(), data.token);
                 window.location.href = "index.php";
             }
             else {
